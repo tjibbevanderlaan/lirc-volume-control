@@ -25,7 +25,7 @@ fi
 echo $$ > "$pidfile"
 
 # Open pipe to listen to new destination 
-mkfifo $pipe
+mkfifo $pipe -m=666
 
 # Ensure pipe and PID file is removed on program exit.
 function stop_service() {
@@ -79,6 +79,7 @@ do
 		if [[ changed_dx -lt 0 ]]; then
 			echo "change direction to $dest"
 			echo "irsend SEND_STOP" $device $cmd
+			irsend SEND_STOP $device $cmd
 			is_running=0
 		elif [[ changed_dx -gt 0 ]]; then 
 			echo "change goal to $dest"
@@ -110,6 +111,7 @@ do
 			# send commands
 			echo $(date +%s%N)
 			echo "irsend SEND_START" $device $cmd
+			irsend SEND_START $device $cmd
 			is_running=1
 		fi
 
@@ -128,6 +130,7 @@ do
 				# We achieved the destination
 				# Stop the sequence
 				echo "irsend SEND_STOP" $device $cmd
+				irsend SEND_STOP $device $cmd
 				echo $(date +%s%N)
 				echo "target of $dest has been achieved"
 				
