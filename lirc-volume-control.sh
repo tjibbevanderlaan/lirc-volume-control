@@ -9,7 +9,7 @@
 #==============================================================================
 
 # Retrieve configuration file with variables
-source lirc-volume-control.cfg
+source "/usr/local/bin/lirc-volume-control/lirc-volume-control.cfg"
 
 cur=0
 dest=0

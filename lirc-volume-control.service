@@ -1,0 +1,10 @@
+[Unit]
+Description=Control volume of Marantz powered by LIRC
+#After=shairport-sync.service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/local/bin/lirc-volume-control/lirc-volume-control.sh
+
+[Install]
+WantedBy=default.target
