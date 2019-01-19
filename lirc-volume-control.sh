@@ -1,15 +1,15 @@
 #!/bin/bash
 
-#title           volume_service.sh
+#title           lirc-volume-control.sh
 #description     Service to set the volumee with help of LIRC.
 #author          tjibbevanderlaan
 #date            20181208
 #version         0.2    
-#usage           bash volume_service.sh
+#usage           bash lirc-volume-control.sh
 #==============================================================================
 
 # Retrieve configuration file with variables
-source volume_service.cfg
+source lirc-volume-control.cfg
 
 cur=0
 dest=0
@@ -43,16 +43,45 @@ fi
 cur=$val
 dest=$val
 
-# Start the service
-echo "Volume daemon is running. Waiting for incoming target..."
-echo "current volume is $cur"
-
 # Function to get the current time
 function now() {
 	echo $(date +%s%N)
 }
 
+# Start the service
+echo "LIRC volume control is starting..."
+echo "Calibrate volume from $cur to 0"
+time=$(now)
+interval=$((time+((sleep_per_step * cur) + 300) * 1000000))
+irsend SEND_START $device $cmd_vol_down
+while true
+do
+	time=$(now)
+	if [[ "$time" -gt "$interval" ]]; then
+		irsend SEND_STOP $device $cmd_vol_down
+		echo "Calibrated to 0"
+		break
+	fi
+done
+if [[ "$cur" -gt "0" ]]; then
+	echo "Move volume knob to saved volume $cur"
+	time=$(now)
+	interval=$((time+(sleep_per_step * cur * 1000000)))
+	irsend SEND_START $device $cmd_vol_up
+	while true
+	do
+		time=$(now)
+		if [[ "$time" -gt "$interval" ]]; then
+			irsend SEND_STOP $device $cmd_vol_up
+			echo "Volume target of $cur has been achieved"
+			break
+		fi
+	done
+fi
 
+# Listen for incoming updates
+echo "LIRC volume control has been initialized."
+echo "Waiting for incoming target..."
 cmd=$cmd_vol_up
 interval=$((sleep_per_step * 1000000)) # 100 ms
 is_running=0
@@ -69,6 +98,10 @@ do
 		curdx=$((dest-cur))
 		# insert the pipe dest
 		dest=$line
+		# add calibration procedure, if dest is 0
+		if [[ "$dest" -eq "0" ]]; then
+			dest=-10
+		fi
 		# check the new direction
 		dx=$((dest-cur))
 		# has the direction changed?
@@ -97,7 +130,7 @@ do
 	if [[ "$cur" -ne "$dest" ]]; then
 		# Than we need to update the current volume to the destination
 		if [[ "$is_running" -eq 0 ]]; then
-			echo "move cursor from $cur to $dest"
+			echo "Move volume knob from $cur to $dest"
 			dx=$((dest-cur))
 			abs_dx=${dx#-}
 			
@@ -132,7 +165,12 @@ do
 				echo "irsend SEND_STOP" $device $cmd
 				irsend SEND_STOP $device $cmd
 				echo $(date +%s%N)
-				echo "target of $dest has been achieved"
+				echo "Volume target of $dest has been achieved"
+
+				if [[ "$dest" -eq "-10" ]]; then
+					cur=0
+					dest=0
+				fi
 				
 				# Save the volume in file
 				echo "save value"
