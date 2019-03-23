@@ -9,7 +9,7 @@
 #==============================================================================
 
 # Retrieve configuration file with variables
-source "/usr/local/bin/lirc-volume-control/lirc-volume-control.cfg"
+source "/home/pi/lirc-volume-control/lirc-volume-control.cfg"
 
 cur=0
 dest=0
@@ -108,19 +108,19 @@ do
 		changed_dx=$((curdx * dx))
 
 		# if direction has changed, stop irsend
-		echo "received $dest"
+		echo "Received $dest"
 		if [[ changed_dx -lt 0 ]]; then
-			echo "change direction to $dest"
-			echo "irsend SEND_STOP" $device $cmd
+			#echo "change direction to $dest"
+			#echo "irsend SEND_STOP" $device $cmd
 			irsend SEND_STOP $device $cmd
 			is_running=0
 		elif [[ changed_dx -gt 0 ]]; then 
-			echo "change goal to $dest"
+			#echo "change goal to $dest"
 			# update end time
 			# time=$(now)
 			# end_time=$((abs_destdx*sleep_per_step * 1000000+end_time))
 		else
-			echo "this happens"
+			#echo "Received dest is equal to cur"
 		fi
 	fi
 	
@@ -130,7 +130,7 @@ do
 	if [[ "$cur" -ne "$dest" ]]; then
 		# Than we need to update the current volume to the destination
 		if [[ "$is_running" -eq 0 ]]; then
-			echo "Move volume knob from $cur to $dest"
+			#echo "Move volume knob from $cur to $dest"
 			dx=$((dest-cur))
 			abs_dx=${dx#-}
 			
@@ -142,8 +142,8 @@ do
 			fi
 
 			# send commands
-			echo $(date +%s%N)
-			echo "irsend SEND_START" $device $cmd
+			#echo $(date +%s%N)
+			#echo "irsend SEND_START" $device $cmd
 			irsend SEND_START $device $cmd
 			is_running=1
 		fi
@@ -156,15 +156,15 @@ do
 			elif [[ "$dx" -lt 0 ]]; then
 				cur=$((cur-1))
 			fi
-			echo $cur
+			#echo $cur
 
 			# Is the current volume equal to destination?
 			if [[ "$cur" -eq "$dest" ]]; then
 				# We achieved the destination
 				# Stop the sequence
-				echo "irsend SEND_STOP" $device $cmd
+				#echo "irsend SEND_STOP" $device $cmd
 				irsend SEND_STOP $device $cmd
-				echo $(date +%s%N)
+				#echo $(date +%s%N)
 				echo "Volume target of $dest has been achieved"
 
 				if [[ "$dest" -eq "-10" ]]; then
@@ -173,8 +173,8 @@ do
 				fi
 				
 				# Save the volume in file
-				echo "save value"
-				echo $cur > $saved_volume
+				#echo "save value"
+				#echo $cur > $saved_volume
 				is_running=0
 			fi
 		fi
