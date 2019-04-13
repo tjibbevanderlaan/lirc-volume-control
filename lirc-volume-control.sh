@@ -115,12 +115,12 @@ do
 			irsend SEND_STOP $device $cmd
 			is_running=0
 		elif [[ changed_dx -gt 0 ]]; then 
-			#echo "change goal to $dest"
+			echo "change goal to $dest"
 			# update end time
 			# time=$(now)
 			# end_time=$((abs_destdx*sleep_per_step * 1000000+end_time))
 		else
-			#echo "Received dest is equal to cur"
+			echo "Received dest is equal to cur"
 		fi
 	fi
 	

@@ -4,7 +4,7 @@ Description=Control volume of Marantz powered by LIRC
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /usr/local/bin/lirc-volume-control/lirc-volume-control.sh
+ExecStart=/bin/bash /home/pi/lirc-volume-control/lirc-volume-control.sh
 
 [Install]
 WantedBy=default.target
